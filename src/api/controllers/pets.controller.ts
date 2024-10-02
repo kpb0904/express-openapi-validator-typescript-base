@@ -33,8 +33,21 @@ let creationId: number = 4;
 function getPets(req: Request, res: Response) {
   const type = String(req.query.type);
   const limit = Number(req.query.limit);
-  const result = pets.filter(pet => pet.type === type).slice(0, limit);
-  res.json(result);
+  const tags = req.query.tags;
+  
+  let result = pets.filter(pet => pet.type === type);
+
+  if (tags) {
+    const tagsArray = Array.isArray(tags) ? tags : [tags];
+    result = result.filter(pet => tagsArray.every(tag => {
+      if (typeof tag === 'string') {
+        return pet.tags.includes(tag);
+      }
+      return false;
+    }));
+  }
+
+  res.json(result.slice(0, limit));
 }
 
 function createPet(req: Request, res: Response) {
